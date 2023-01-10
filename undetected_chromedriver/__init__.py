@@ -769,12 +769,12 @@ class Chrome(selenium.webdriver.chrome.webdriver.WebDriver):
     def __dir__(self):
         return object.__dir__(self)
 
-    def __del__(self):
-        try:
-            self.service.process.kill()
-        except:  # noqa
-            pass
-        self.quit()
+    # def __del__(self):
+    #     try:
+    #         self.service.process.kill()
+    #     except:  # noqa
+    #         pass
+    #     self.quit()
 
     @classmethod
     def _ensure_close(cls, self):
