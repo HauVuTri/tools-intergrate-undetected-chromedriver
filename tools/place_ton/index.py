@@ -9,7 +9,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 import undetected_chromedriver
 from tools.proxy_combination import TMProxy
 from tools.utilities import get_element_visibility_located, press_down_n_times_and_press_enter, random_account_profile, \
-    get_element_clickable, click_element_by_action_chain_css_selector
+    get_element_clickable, click_element_by_action_chain_css_selector, get_element_presence_located
 from undetected_chromedriver import ChromeOptions
 from selenium.webdriver import ActionChains, Keys, Proxy
 from selenium.webdriver.support import expected_conditions as EC
@@ -55,8 +55,8 @@ def get_hotmail_otp(driver: undetected_chromedriver.Chrome, email_hotmail, passw
     except:
         # if not found tiktok email:
         driver.switch_to.window(driver.window_handles[0])
-        #click vao button resend
-        driver.find_element(By.CSS_SELECTOR,"button[data-e2e='send-code-button']").click()
+        # click vao button resend
+        driver.find_element(By.CSS_SELECTOR, "button[data-e2e='send-code-button']").click()
         driver.switch_to.window(driver.window_handles[1])
         # tim toi email cua tiktok
         get_element_visibility_located(driver, 'span[title="noreply@account.tiktok.com"]').click()
@@ -76,7 +76,7 @@ def solve_captcha():
     pass
 
 
-def register_tiktok_by_email(email_mail, password_mail, **kwargs):
+def place_ton_register(email_mail, password_mail, **kwargs):
     status = "Bắt đầu Reg"
     (first_name, player_id, password_fake, phone, withdraw_pin, bank_account, email_fake, bank_branch,
      bank_type) = random_account_profile(password_uppercase_character_require=True,
@@ -110,102 +110,78 @@ def register_tiktok_by_email(email_mail, password_mail, **kwargs):
     if not email_mail or not password_mail:
         raise Exception('dont exist email or password')
     chrome_option = ChromeOptions()
-    chrome_option.add_argument("--window-size=1366,768")
-    # if proxy:
-    #
-    #     if protocol_proxy == "https" or protocol_proxy == "http":
-    #         proxy_object = Proxy({
-    #             "proxyType": "MANUAL",
-    #             "httpProxy": proxy,
-    #         })
-    #     elif protocol_proxy == "sock5" or protocol_proxy == "sock":
-    #         proxy_object = Proxy({
-    #             "proxyType": "MANUAL",
-    #             "socksProxy": proxy,
-    #         })
-    #     chrome_option.proxy = proxy_object
-
+    chrome_option.add_argument("--window-size=1920,1080")
     if proxy:
         chrome_option.add_argument('--proxy-server=' + proxy)
     driver = undetected_chromedriver.Chrome(options=chrome_option, user_data_dir=user_data_dir)
     status = "Khởi tạo chrome thành công"
-    driver.implicitly_wait(20)
-    driver.get("https://www.tiktok.com/signup")
-    status = "Vào tiktok thành công"
-    # Sử dụng số điện thoại hoặc email -> clíck()
-    # driver.find_element(By.CSS_SELECTOR, "#loginContainer > div > div > a > div").click()
-    get_element_visibility_located(driver, "#loginContainer > div > div > a > div").click()
-    WebDriverWait(driver, 15).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href="/signup/phone-or-email/email"]'))).click()
+    driver.implicitly_wait(15)
+    driver.get("https://mail.google.com/mail/")
+    # driver.find_element(By.CSS_SELECTOR,"input[type='email']").send_keys(email_mail)
+    get_element_visibility_located(driver, "input[type='email']").send_keys(email_mail)
+    ActionChains(driver).send_keys(Keys.ENTER).perform()
+    # driver.find_element(By.CSS_SELECTOR,"input[type='password']").send_keys(password_mail)
+    get_element_visibility_located(driver, "input[type='password']").send_keys(password_mail)
+    ActionChains(driver).send_keys(Keys.ENTER).perform()
+    driver.tab_new('https://ton.place/')
+    driver.switch_to.window(driver.window_handles[1])
 
-    get_element_visibility_located(driver, "#loginContainer > div > form > div > div:nth-child(1) > div").click()
-    # Chon thang sinh
-    press_down_n_times_and_press_enter(driver, random.randint(1, 12))
-    action = ActionChains(driver)
-    action.send_keys(Keys.TAB).perform()
-    time.sleep(1)
-    # Chon ngay sinh
-    press_down_n_times_and_press_enter(driver, random.randint(1, 25))
-    action.send_keys(Keys.TAB).perform()
-    time.sleep(1)
-    # Chon nam sinh
-    press_down_n_times_and_press_enter(driver, random.randint(20, 50))
-    # Email address
-    get_element_visibility_located(driver, "#loginContainer > div > form > div > div > input[name='email']").send_keys(
-        email_mail)
+    # click vào join now
     get_element_visibility_located(driver,
-                                   "#loginContainer > div > form > div > div > input[type='password']").send_keys(
-        password_fake)
-    time.sleep(1)
-    ActionChains(driver).move_by_offset(150, 250).click().perform()
-    time.sleep(1)
-    click_element_by_action_chain_css_selector(driver, "#loginContainer > div > form > div:nth-child(8) > div > button")
-
-    # Nếu tiktok bắt giải captcha
+                                   "#root > div > div.Content__wrap.fullWidth > div > div > div.Landing__wrapper.__header > div > div.Landing__header__content > div.Landing__header__btns > div.Button.default.normal").click()
+    sign_in_with_google =  get_element_visibility_located(driver,
+                                   "#root > div > div.Content__wrap.fullWidth > div > div > div.AuthPopover__wrapper > div.AuthPopover > div > div > div.Auth > div.Auth__socials > div:nth-child(2)")
+    time.sleep(2)
+    sign_in_with_google.click()
     try:
-        get_element_visibility_located(driver, "#captcha_container", 5)
+        get_element_visibility_located(driver, f"div[data-identifier='{email_mail.strip().lower()}']").click()
     except:
-        solve_captcha()
-    try:
-        get_element_visibility_located(driver,"div[type='error']",5)
-    except:
-        status = "Lỗi sau khi ấn Send Code Otp: Sorry, something went wrong, please try again later"
+        sign_in_with_google.click()
+        get_element_visibility_located(driver, f"div[data-identifier='{email_mail.strip().lower()}']").click()
 
-    otp_mail = get_hotmail_otp(driver, email_mail, password_mail)
-    # Nhập OTP
-    get_element_visibility_located(driver, "div.code-input > input").send_keys(otp_mail)
-    # Click nhận thông báo
-    get_element_visibility_located(driver, "#loginContainer > div > form > div > div > label > i").click()
-    # Click next btn
-    get_element_visibility_located(driver, "#loginContainer > div > form > button").click()
-    # get_element_visibility_located(driver,"input[name='new-username']").send_keys(player_id)
-    get_element_visibility_located(driver, "#loginContainer > div > form > div:nth-child(5)").click()
+    # todo: thiếu bước nhập player_id -> rồi enter
+    get_element_visibility_located(driver,"#root > div > div.Content__wrap > div.Form > div:nth-child(1) > div.Form__item__cont > div > div.Input__wrapper > input").send_keys(player_id)
+    time.sleep(3)
+    get_element_presence_located(driver,"#root > div > div.Content__wrap > div.Form > div:nth-child(2) > div > div").click()
 
-    # Đã đăng ký thành công vào giao diện tiktok
-    if kwargs.get('profile_buff'):
-        # Eg: @haulaptrinh
-        driver.get(f"https://www.tiktok.com/{kwargs.get('profile_buff')}")
-        get_element_visibility_located(driver,
-                                       "#app > div > div > div > div > div > div > div:nth-child(1) > div > div > div > a > div > div > img").click()
-        get_element_visibility_located(driver, "span[data-e2e='browse-like-icon']").click()
+
+    # click vào thể loại muốn theo đuổi -> chọn cái đầu tiên
+    get_element_visibility_located(driver, "#root > div > div.Placeholder__actions > div > div:nth-child(1)").click()
+
+    driver.get("https://ton.place/feed?section=following")
+    # vào trang my Page
+    myPageElem = driver.find_element(By.CSS_SELECTOR, "#root > div > div.App__desktop_menu > div > a:nth-child(2)")
+    #ở đây đã lấy đc id của user này
+    idUser = myPageElem.get_attribute("href")
+    myPageElem.click()
+    # Đổi avatar
+    driver.find_element(By.CSS_SELECTOR,
+                        "#profile_scrollView > div > div.ptr__children > div.Profile > div.Profile__info_block > div.Profile__common_info > div.UnitPhoto.large.active > img").click()
+    # click change photo
+    driver.find_element(By.CSS_SELECTOR,"#action_sheet > div > div.BottomSheet__sheet_wrap > div > div.BottomSheet__content.hasScroll > div > div:nth-child(1) > div > div > div.ListItem__content > div > input").click()
+
+    #select image to update
+    driver.find_element(By.CSS_SELECTOR,"#action_sheet > div > div.BottomSheet__sheet_wrap > div > div.BottomSheet__content.hasScroll > div > div:nth-child(1) > div:nth-child(2) > div > div.ListItem__content > div > input").send_keys(os.getcwd() + "/images/1.png")
     time.sleep(999)
+
+
 
 
 def readTxtData():
     dir_path = os.getcwd()
-    # email, password, created_at = ("test", "test","test")
-    # register_tiktok_by_email("test", "test", user_data_dir=f"{dir_path}/profiles/{email}")
-    # Read each line txt file
+    # gmail, password, email_recovery = ("test", "test","test")
+    # register_tiktok_by_email("test", "test", user_data_dir=f"{dir_path}/profiles/{gmail}")
+    # Read each line txt file -> get google accounts -> using this account to register place.ton
     with open('data/file.txt', 'r') as f:
         for line in f:
-            email, password, created_at = line.strip().split('|')
-            # print(email, password)
-            # do something with the email and password
+            gmail, password, email_recovery = line.strip().split('|')
+            # print(gmail, password)
+            # do something with the gmail and password
             tmproxy = TMProxy("53d8148ddd854f3f58a3a8ea6cf46d6d")
             protocol_proxy = "http"
             proxy = tmproxy.get_new_proxy()
-            register_tiktok_by_email(email, password, user_data_dir=f"{dir_path}/profiles/{email}", proxy=proxy,
-                                     protocol_proxy=protocol_proxy, profile_buff='@haulaptrinh')
+            place_ton_register(gmail, password, user_data_dir=f"{dir_path}/profiles/{gmail}", proxy=proxy,
+                               protocol_proxy=protocol_proxy, profile_buff='@haulaptrinh')
             time.sleep(tmproxy.get_rest_time_to_next_proxy())
 
 

@@ -166,6 +166,6 @@ def press_down_n_times_and_press_enter(driver, n=1):
     actions = ActionChains(driver)
     for _ in range(n):
         actions = actions.send_keys(Keys.DOWN)
-        actions.pause(0.05)
+        # actions.pause(0.05)
     actions.send_keys(Keys.ENTER)
     actions.perform()
