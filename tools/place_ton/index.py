@@ -1,18 +1,23 @@
 # This is a sample Python script.
 import os
 import random
+import re
 import time
 
+from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from twocaptcha import TwoCaptcha
 
 import undetected_chromedriver
 from tools.proxy_combination import TMProxy
-from tools.utilities import get_element_visibility_located, press_down_n_times_and_press_enter, random_account_profile, \
-    get_element_clickable, click_element_by_action_chain_css_selector, get_element_presence_located
+from tools.utilities import get_element_visibility_located, random_account_profile, \
+    get_element_presence_located, get_list_quotes_random
 from undetected_chromedriver import ChromeOptions
-from selenium.webdriver import ActionChains, Keys, Proxy
-from selenium.webdriver.support import expected_conditions as EC
+
+token_viotp = '0d2247f6ad364364a22c1cb3abbe4e13'  # Đây là token ở viotp
+key_2captcha = '88ec72f21f08c05315757dca2941eaf4'  # Day la  key cua 2captcha
 
 
 def get_hotmail_otp(driver: undetected_chromedriver.Chrome, email_hotmail, password_hotmail):
@@ -71,9 +76,38 @@ def get_hotmail_otp(driver: undetected_chromedriver.Chrome, email_hotmail, passw
     return otp_tikok
 
 
-def solve_captcha():
-    # todo: Handle solve captcha if exist
+def handle_check_solve_captcha(driver):
+    iframe = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'iframe[title="reCAPTCHA"]')))
+    src = iframe.get_attribute('src')
+    if not src:
+        raise Exception("Not found src iframe ")
+
+    def get_site_key(src):
+        src = "https://www.google.com/recaptcha/api2/anchor?ar=1&k=6LcvQtkhAAAAAF_-x9pdXxBAWCMSpDUur5g9UGpO&co=aHR0cHM6Ly90b24ucGxhY2U6NDQz&hl=en&type=image&v=u35fw2Dx4G0WsO6SztVYg4cV&theme=dark&size=normal&badge=bottomright&cb=pea3mdjaopm6"
+        match = re.search("&k=(.+?)&", src)
+
+        if match:
+            k_value = match.group(1)
+            print(k_value)
+            return k_value
+        else:
+            print("&k value not found")
+
+    # todo: Get site_key from the captcha in the web
+    site_key = get_site_key(src)
+    solver = TwoCaptcha(apiKey=key_2captcha)
+    result = solver.recaptcha(sitekey=site_key, url='https://ton.place/id435978?w=post')
+    print(result)
+    time.sleep(999)
     pass
+
+
+def choose_random_image_in_folder(folder_path):
+    # get a list of all files in the directory
+    files = os.listdir(folder_path)
+    # select a random file from the list
+    random_file = random.choice(files)
+    return random_file
 
 
 def place_ton_register(email_mail, password_mail, **kwargs):
@@ -84,8 +118,6 @@ def place_ton_register(email_mail, password_mail, **kwargs):
     print(first_name, player_id, password_fake, phone, withdraw_pin, bank_account, email_fake, bank_branch, bank_type)
     """Đây là những setting khi khởi tạo Chrome Undetected """
     user_data_dir = kwargs.get('user_data_dir')
-    # todo Tạm thời để None để test đã
-    user_data_dir = None
     proxy = kwargs.get('proxy')
     protocol_proxy = kwargs.get('protocol_proxy')
     port = 0
@@ -118,6 +150,8 @@ def place_ton_register(email_mail, password_mail, **kwargs):
     driver.implicitly_wait(15)
     driver.get("https://mail.google.com/mail/")
     # driver.find_element(By.CSS_SELECTOR,"input[type='email']").send_keys(email_mail)
+    get_element_visibility_located(driver, "input[type='email']").click()
+    time.sleep(1)
     get_element_visibility_located(driver, "input[type='email']").send_keys(email_mail)
     ActionChains(driver).send_keys(Keys.ENTER).perform()
     # driver.find_element(By.CSS_SELECTOR,"input[type='password']").send_keys(password_mail)
@@ -129,8 +163,8 @@ def place_ton_register(email_mail, password_mail, **kwargs):
     # click vào join now
     get_element_visibility_located(driver,
                                    "#root > div > div.Content__wrap.fullWidth > div > div > div.Landing__wrapper.__header > div > div.Landing__header__content > div.Landing__header__btns > div.Button.default.normal").click()
-    sign_in_with_google =  get_element_visibility_located(driver,
-                                   "#root > div > div.Content__wrap.fullWidth > div > div > div.AuthPopover__wrapper > div.AuthPopover > div > div > div.Auth > div.Auth__socials > div:nth-child(2)")
+    sign_in_with_google = get_element_visibility_located(driver,
+                                                         "#root > div > div.Content__wrap.fullWidth > div > div > div.AuthPopover__wrapper > div.AuthPopover > div > div > div.Auth > div.Auth__socials > div:nth-child(2)")
     time.sleep(2)
     sign_in_with_google.click()
     try:
@@ -140,31 +174,75 @@ def place_ton_register(email_mail, password_mail, **kwargs):
         get_element_visibility_located(driver, f"div[data-identifier='{email_mail.strip().lower()}']").click()
 
     # todo: thiếu bước nhập player_id -> rồi enter
-    get_element_visibility_located(driver,"#root > div > div.Content__wrap > div.Form > div:nth-child(1) > div.Form__item__cont > div > div.Input__wrapper > input").send_keys(player_id)
+    get_element_visibility_located(driver, "#root > div > div.Content__wrap > div.Form > div:nth-child(1) > div.Form__item__cont > div > div.Input__wrapper > input").send_keys(player_id)
     time.sleep(3)
-    get_element_presence_located(driver,"#root > div > div.Content__wrap > div.Form > div:nth-child(2) > div > div").click()
+    get_element_presence_located(driver, "#root > div > div.Content__wrap > div.Form > div:nth-child(2) > div > div").click()
+    time.sleep(5)
+    driver.find_element(By.CSS_SELECTOR, '#root > div > div.Placeholder__actions > div > div:nth-child(1) > div > div.ListItem__content > div').click()
 
-
-    # click vào thể loại muốn theo đuổi -> chọn cái đầu tiên
-    get_element_visibility_located(driver, "#root > div > div.Placeholder__actions > div > div:nth-child(1)").click()
-
+    # (WebDriverWait(driver, 15).until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, '#root > div > div.Placeholder__actions > div > div:nth-child(1) > div > div.ListItem__content > div'), 'Info & Entertainment'))).parent().parent().parent().click()
+    try:
+        # click vào thể loại muốn theo đuổi -> chọn cái đầu tiên
+        get_element_visibility_located(driver, "#root > div > div.Placeholder__actions > div > div:nth-child(1)", 10).click()
+    except:
+        pass
     driver.get("https://ton.place/feed?section=following")
     # vào trang my Page
     myPageElem = driver.find_element(By.CSS_SELECTOR, "#root > div > div.App__desktop_menu > div > a:nth-child(2)")
-    #ở đây đã lấy đc id của user này
-    idUser = myPageElem.get_attribute("href")
+    # ở đây đã lấy đc id của user này
+    user_id = myPageElem.get_attribute("href")
+    print(f"User id là: {user_id}")
     myPageElem.click()
     # Đổi avatar
     driver.find_element(By.CSS_SELECTOR,
                         "#profile_scrollView > div > div.ptr__children > div.Profile > div.Profile__info_block > div.Profile__common_info > div.UnitPhoto.large.active > img").click()
     # click change photo
-    driver.find_element(By.CSS_SELECTOR,"#action_sheet > div > div.BottomSheet__sheet_wrap > div > div.BottomSheet__content.hasScroll > div > div:nth-child(1) > div > div > div.ListItem__content > div > input").click()
+    # get_element_visibility_located(driver,"#action_sheet > div > div.BottomSheet__sheet_wrap > div > div.BottomSheet__content.hasScroll > div > div:nth-child(1) > div > div > div.ListItem__content > div > input").click()
+    # driver.find_element(By.CSS_SELECTOR,
+    #                     "#action_sheet > div > div.BottomSheet__sheet_wrap > div > div.BottomSheet__content.hasScroll > div > div:nth-child(1) > div > div > div.ListItem__content > div > input")
 
-    #select image to update
-    driver.find_element(By.CSS_SELECTOR,"#action_sheet > div > div.BottomSheet__sheet_wrap > div > div.BottomSheet__content.hasScroll > div > div:nth-child(1) > div:nth-child(2) > div > div.ListItem__content > div > input").send_keys(os.getcwd() + "/images/1.png")
+    # select image to update
+    driver.find_element(By.CSS_SELECTOR,
+                        "#action_sheet > div > div.BottomSheet__sheet_wrap > div > div.BottomSheet__content.hasScroll > div > div:nth-child(1) > div > div > div.ListItem__content > div > input").send_keys(
+        os.getcwd() + f"/images/{choose_random_image_in_folder(os.getcwd() + '/images')}")
+
+    # Update cover picture:
+    driver.find_element(By.CSS_SELECTOR, "#profile_scrollView > div > div.ptr__children > div.Profile__cover.active.visible.empty > input").send_keys(
+        os.getcwd() + f"/images/{choose_random_image_in_folder(os.getcwd() + '/images')}")
+    time.sleep(2)
+    # Click save btn
+    # get_element_visibility_located(driver,"#root > div > div.App__desktop_cont > div > div.Modal__wrap > div > div.BottomBar.row > div > div > div").click()
+    driver.execute_script('document.querySelector("#root > div > div.App__desktop_cont > div > div.Modal__wrap > div > div.BottomBar.row > div > div > div").click()')
+    time.sleep(4)
+    # driver.find_element(By.CSS_SELECTOR, "#root > div > div.App__desktop_cont > div > div.Modal__wrap > div > div.BottomBar.row > div > div > div").click()
+    # Đăng status
+    driver.find_element(By.CSS_SELECTOR, "#profile_scrollView > div > div.ptr__children > div.Profile > div.Profile__info_block > div.Profile__common_info > div.Profile__common_info__cont > a").click()
+    random_11_quotes = get_list_quotes_random(limit=11)
+    if not random_11_quotes:
+        random_11_quotes = [{"content": "Hello"}, {"content": "Hello"}, {"content": "Hello"}, {"content": "Hello"}, {"content": "Hello"}, {"content": "Hello"}, {"content": "Hello"}, {"content": "Hello"},
+                            {"content": "Hello"}, {"content": "Hello"}, {"content": "Hello"}]
+
+    get_element_visibility_located(driver, "#root > div > div.App__desktop_cont > div > div.Modal__wrap > div > div.ScrollView > div > div > div > div.Form__item__cont > div > input").send_keys(
+        random_11_quotes[0]['content'])
+    time.sleep(1)
+    # get_element_visibility_located(driver, "#root > div > div.App__desktop_cont > div > div.Modal__wrap > div > div.BottomBar.row > div > div > div").click()
+    driver.execute_script('document.querySelector("#root > div > div.App__desktop_cont > div > div.Modal__wrap > div > div.BottomBar.row > div > div > div").click()')
+
+    # driver.find_element(By.CSS_SELECTOR, "#root > div > div.App__desktop_cont > div > div.Modal__wrap > div > div.BottomBar.row > div > div > div").click()
+
+    # Đăng post(bài viết)
+    def post_news(driver, quote="Hello", is_check_captcha=False):
+        print(f"quote la: {quote}")
+        get_element_visibility_located(driver, "#profile_scrollView > div > div.ptr__children > div.Profile > a > div > div").click()
+        get_element_visibility_located(driver, "#ql_editor > div > div.ql-editor.ql-blank").send_keys(quote)
+        get_element_visibility_located(driver, "#root > div > div.App__desktop_cont > div > div.Modal__wrap > div > div.BottomBar.fixed.row > div > div > div").click()
+        if is_check_captcha:
+            handle_check_solve_captcha(driver)
+    time.sleep(4)
+    post_news(driver, quote=random_11_quotes[1]['content'], is_check_captcha=True)
+    for i in range(9):
+        post_news(driver, quote=random_11_quotes[i + 2]['content'], is_check_captcha=False)
     time.sleep(999)
-
-
 
 
 def readTxtData():
