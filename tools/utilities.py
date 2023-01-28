@@ -2,6 +2,7 @@ import random
 import re
 import string
 
+import requests
 from selenium.common import NoSuchElementException
 from selenium.webdriver import ActionChains, Keys
 from selenium.webdriver.common.by import By
@@ -169,3 +170,13 @@ def press_down_n_times_and_press_enter(driver, n=1):
         # actions.pause(0.05)
     actions.send_keys(Keys.ENTER)
     actions.perform()
+
+
+def get_list_quotes_random(limit=3, tag='love'):
+    URL = f'https://api.quotable.io/quotes?limit={limit}&tags={tag}'
+    # sending post request and saving response as response object
+    r = requests.get(url=URL)
+    data = r.json()
+    return data['results']
+
+print((get_list_quotes_random(10))[0]['content'])
