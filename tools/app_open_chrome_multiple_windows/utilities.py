@@ -13,6 +13,7 @@ import sys
 from selenium.webdriver.support.wait import WebDriverWait
 
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 
 # Local library import.
 
@@ -72,8 +73,6 @@ def no_accent_vietnamese(s):
     return s
 
 
-
-
 def get_element_visibility_located(driver, css_selector, time=15):
     return WebDriverWait(driver, time).until(EC.visibility_of_element_located((By.CSS_SELECTOR, css_selector)))
 
@@ -102,4 +101,9 @@ def get_list_quotes_random(limit=3, tag='love'):
     data = r.json()
     return data['results']
 
+
 print((get_list_quotes_random(10))[0]['content'])
+
+
+def zoom_out_selenium(driver, percent_zoom=80):
+    driver.execute_script(f"document.body.style.zoom='{percent_zoom}%'")

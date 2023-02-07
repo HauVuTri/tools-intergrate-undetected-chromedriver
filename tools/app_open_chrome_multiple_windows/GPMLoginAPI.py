@@ -21,10 +21,12 @@ class GPMLoginAPI(object):
             return resp.json()
         except:
             print('error GetProfiles()')
-            return None
+            re. turn None
 
     def Create(self, name: str, proxy: str = '', isNoiseCanvas: bool = False):
         try:
+            if not proxy:
+                proxy = ''
             # Make api url
             url = f"{self._apiUrl}{self.API_CREATE_PATH}?name={name}&proxy={proxy}"
             if (isNoiseCanvas):
