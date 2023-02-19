@@ -58,6 +58,16 @@ class Ui_MainWindow(object):
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
         self.label_5.setGeometry(QtCore.QRect(20, 190, 31, 16))
         self.label_5.setObjectName("label_5")
+        self.proxyBox = QtWidgets.QGroupBox(self.centralwidget)
+        self.proxyBox.setGeometry(QtCore.QRect(470, 100, 281, 61))
+        self.proxyBox.setObjectName("proxyBox")
+        self.tinsoftProxyButton = QtWidgets.QRadioButton(self.proxyBox)
+        self.tinsoftProxyButton.setGeometry(QtCore.QRect(10, 30, 95, 20))
+        self.tinsoftProxyButton.setChecked(True)
+        self.tinsoftProxyButton.setObjectName("tinsoftProxyButton")
+        self.tmProxyButton = QtWidgets.QRadioButton(self.proxyBox)
+        self.tmProxyButton.setGeometry(QtCore.QRect(130, 30, 95, 20))
+        self.tmProxyButton.setObjectName("tmProxyButton")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -84,6 +94,9 @@ class Ui_MainWindow(object):
         self.label_3.setText(_translate("MainWindow", "Dia chi GPM (Bam Copy tren app)"))
         self.url.setToolTip(_translate("MainWindow", "Nhap key Tmproxy"))
         self.label_5.setText(_translate("MainWindow", "URL"))
+        self.proxyBox.setTitle(_translate("MainWindow", "Loại Proxy"))
+        self.tinsoftProxyButton.setText(_translate("MainWindow", "Tinsoft"))
+        self.tmProxyButton.setText(_translate("MainWindow", "TmProxy"))
 
 
 if __name__ == "__main__":

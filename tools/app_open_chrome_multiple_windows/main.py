@@ -18,7 +18,7 @@ from selenium.webdriver.chrome.options import Options
 
 from UndetectChromeDriver import UndetectChromeDriver
 
-from proxy_combination import TMProxy
+from proxy_combination import TMProxy, TinsoftProxy
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
@@ -90,6 +90,16 @@ class Ui_MainWindow(object):
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
         self.label_5.setGeometry(QtCore.QRect(20, 190, 31, 16))
         self.label_5.setObjectName("label_5")
+        self.proxyBox = QtWidgets.QGroupBox(self.centralwidget)
+        self.proxyBox.setGeometry(QtCore.QRect(470, 100, 281, 61))
+        self.proxyBox.setObjectName("proxyBox")
+        self.tinsoftProxyButton = QtWidgets.QRadioButton(self.proxyBox)
+        self.tinsoftProxyButton.setGeometry(QtCore.QRect(10, 30, 95, 20))
+        self.tinsoftProxyButton.setChecked(True)
+        self.tinsoftProxyButton.setObjectName("tinsoftProxyButton")
+        self.tmProxyButton = QtWidgets.QRadioButton(self.proxyBox)
+        self.tmProxyButton.setGeometry(QtCore.QRect(130, 30, 95, 20))
+        self.tmProxyButton.setObjectName("tmProxyButton")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -118,6 +128,11 @@ class Ui_MainWindow(object):
         self.label_5.setText(_translate("MainWindow", "URL"))
         self.apiGpmAddress.setText(_translate("MainWindow", "http://127.0.0.1:19995"))
         self.label_3.setText(_translate("MainWindow", "Dia chi GPM (Bam Copy tren app)"))
+        self.url.setToolTip(_translate("MainWindow", "Nhap key"))
+        self.label_5.setText(_translate("MainWindow", "URL"))
+        self.proxyBox.setTitle(_translate("MainWindow", "Loại Proxy"))
+        self.tinsoftProxyButton.setText(_translate("MainWindow", "Tinsoft"))
+        self.tmProxyButton.setText(_translate("MainWindow", "TmProxy"))
 
     def runProgram(self):
         self.runButton.setText("Running...")
@@ -129,7 +144,7 @@ class Ui_MainWindow(object):
         if len(list_key_proxy) < int(self.numberThreads.text()):
             msg = QMessageBox()
             msg.setWindowTitle("Error")
-            msg.setText("Số key nhỏ hơn số luồng mong muốn. Mòi nhập lại")
+            msg.setText("Số key nhỏ hơn số luồng mong muốn. Mời nhập lại")
             x = msg.exec_()
             self.runButton.setText("Run")
             self.runButton.setEnabled(True)
@@ -169,8 +184,12 @@ class Ui_MainWindow(object):
                 width /= (number_theads // 2)
 
         api = GPMLoginAPI(self.apiGpmAddress.text())
-        tmproxy = TMProxy(key)
-        proxy = tmproxy.get_new_proxy(raise_except=False)
+        if  self.tinsoftProxyButton.isChecked():
+            tmproxy = TinsoftProxy(key)
+            proxy = tmproxy.get_new_proxy()
+        else:
+            tmproxy = TMProxy(key)
+            proxy = tmproxy.get_new_proxy(raise_except=False)
         if not proxy:
             update_status(thread_nth, 'error_Không có PROXY')
             return
