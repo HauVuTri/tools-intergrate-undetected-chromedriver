@@ -102,7 +102,6 @@ def get_list_quotes_random(limit=3, tag='love'):
     return data['results']
 
 
-print((get_list_quotes_random(10))[0]['content'])
 
 
 def zoom_out_selenium(driver, percent_zoom=80):

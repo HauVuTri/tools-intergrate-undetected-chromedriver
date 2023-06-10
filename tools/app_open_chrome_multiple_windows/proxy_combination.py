@@ -95,8 +95,13 @@ class TinsoftProxy(Proxy):
         URL = 'http://proxy.tinsoftsv.com/api/changeProxy.php'
         r = requests.get(url=URL, params=PARAMS)
         data = r.json()
-        if (data['proxy']):
-            proxy_address = data['proxy']
+        print(data)
+        try:
+            if (data['proxy']):
+                proxy_address = data['proxy']
+        except:
+            time.sleep(30)
+            pass
         return proxy_address
 
     def get_rest_time_to_next_proxy(self):
