@@ -73,11 +73,11 @@ def no_accent_vietnamese(s):
     return s
 
 
-def get_element_visibility_located(driver, css_selector, time=15):
+def get_element_visibility_located(driver, css_selector, time=25):
     return WebDriverWait(driver, time).until(EC.visibility_of_element_located((By.CSS_SELECTOR, css_selector)))
 
 
-def get_element_presence_located(driver, css_selector, time=15):
+def get_element_presence_located(driver, css_selector, time=25):
     return WebDriverWait(driver, time).until(EC.presence_of_element_located((By.CSS_SELECTOR, css_selector)))
 
 

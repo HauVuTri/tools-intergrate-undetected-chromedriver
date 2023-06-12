@@ -10,6 +10,7 @@
 import threading
 import time
 
+from PyQt5.QtCore import Qt
 from screeninfo import get_monitors
 
 from GPMLoginAPI import GPMLoginAPI
@@ -23,7 +24,11 @@ from proxy_combination import TMProxy, TinsoftProxy
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 
-from utilities import zoom_out_selenium
+from utilities import zoom_out_selenium, get_element_visibility_located,click_element_by_action_chain_css_selector
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 
 # Global variable
 statuses = {}
@@ -44,7 +49,7 @@ def update_status(thread_nth=0, current_status=''):
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(850, 662)
+        MainWindow.resize(852, 937)
         MainWindow.setToolTipDuration(2)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -52,7 +57,7 @@ class Ui_MainWindow(object):
         self.keyTMProxy.setGeometry(QtCore.QRect(100, 10, 591, 51))
         self.keyTMProxy.setObjectName("keyTMProxy")
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(20, 20, 71, 16))
+        self.label.setGeometry(QtCore.QRect(10, 20, 71, 16))
         self.label.setObjectName("label")
         self.runButton = QtWidgets.QPushButton(self.centralwidget)
         self.runButton.setGeometry(QtCore.QRect(100, 100, 201, 61))
@@ -61,15 +66,15 @@ class Ui_MainWindow(object):
         self.numberThreads.setGeometry(QtCore.QRect(100, 70, 113, 20))
         self.numberThreads.setObjectName("numberThreads")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.label_2.setGeometry(QtCore.QRect(20, 70, 71, 16))
+        self.label_2.setGeometry(QtCore.QRect(10, 70, 71, 16))
         self.label_2.setObjectName("label_2")
         self.stopButton = QtWidgets.QPushButton(self.centralwidget)
         self.stopButton.setGeometry(QtCore.QRect(320, 120, 101, 41))
         self.stopButton.setObjectName("stopButton")
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
-        self.tableWidget.setGeometry(QtCore.QRect(100, 240, 591, 291))
+        self.tableWidget.setGeometry(QtCore.QRect(80, 560, 681, 291))
         self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(3)
+        self.tableWidget.setColumnCount(5)
         self.tableWidget.setRowCount(0)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(0, item)
@@ -77,6 +82,10 @@ class Ui_MainWindow(object):
         self.tableWidget.setHorizontalHeaderItem(1, item)
         item = QtWidgets.QTableWidgetItem()
         self.tableWidget.setHorizontalHeaderItem(2, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(3, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(4, item)
         self.apiGpmAddress = QtWidgets.QLineEdit(self.centralwidget)
         self.apiGpmAddress.setGeometry(QtCore.QRect(440, 70, 251, 20))
         self.apiGpmAddress.setInputMask("")
@@ -84,14 +93,8 @@ class Ui_MainWindow(object):
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
         self.label_3.setGeometry(QtCore.QRect(280, 70, 161, 16))
         self.label_3.setObjectName("label_3")
-        self.url = QtWidgets.QTextEdit(self.centralwidget)
-        self.url.setGeometry(QtCore.QRect(100, 180, 591, 31))
-        self.url.setObjectName("url")
-        self.label_5 = QtWidgets.QLabel(self.centralwidget)
-        self.label_5.setGeometry(QtCore.QRect(20, 190, 31, 16))
-        self.label_5.setObjectName("label_5")
         self.proxyBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.proxyBox.setGeometry(QtCore.QRect(470, 100, 281, 61))
+        self.proxyBox.setGeometry(QtCore.QRect(470, 100, 221, 61))
         self.proxyBox.setObjectName("proxyBox")
         self.tinsoftProxyButton = QtWidgets.QRadioButton(self.proxyBox)
         self.tinsoftProxyButton.setGeometry(QtCore.QRect(10, 30, 95, 20))
@@ -100,6 +103,41 @@ class Ui_MainWindow(object):
         self.tmProxyButton = QtWidgets.QRadioButton(self.proxyBox)
         self.tmProxyButton.setGeometry(QtCore.QRect(130, 30, 95, 20))
         self.tmProxyButton.setObjectName("tmProxyButton")
+        self.slider_zoom_percent = QtWidgets.QSlider(self.centralwidget)
+        self.slider_zoom_percent.setGeometry(QtCore.QRect(100, 240, 511, 41))
+        self.slider_zoom_percent.setMinimum(50)
+        self.slider_zoom_percent.setMaximum(100)
+        self.slider_zoom_percent.setSliderPosition(80)
+        self.slider_zoom_percent.setOrientation(QtCore.Qt.Horizontal)
+        self.slider_zoom_percent.setObjectName("horizontalSlider")
+        self.label_4 = QtWidgets.QLabel(self.centralwidget)
+        self.label_4.setGeometry(QtCore.QRect(10, 230, 81, 51))
+        self.label_4.setTextFormat(QtCore.Qt.AutoText)
+        self.label_4.setScaledContents(False)
+        self.label_4.setWordWrap(True)
+        self.label_4.setObjectName("label_4")
+        self.label_zoom = QtWidgets.QLabel(self.centralwidget)
+        self.label_zoom.setGeometry(QtCore.QRect(610, 240, 121, 41))
+        self.label_zoom.setMinimumSize(QtCore.QSize(0, 0))
+        font = QtGui.QFont()
+        font.setPointSize(18)
+        self.label_zoom.setFont(font)
+        self.label_zoom.setLineWidth(1)
+        self.label_zoom.setTextFormat(Qt.AutoText)
+        self.label_zoom.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_zoom.setObjectName("label_zoom")
+        self.label_5 = QtWidgets.QLabel(self.centralwidget)
+        self.label_5.setGeometry(QtCore.QRect(10, 360, 71, 61))
+        self.label_5.setWordWrap(True)
+        self.label_5.setObjectName("label_5")
+        self.accounts_text_edit = QtWidgets.QTextEdit(self.centralwidget)
+        self.accounts_text_edit.setGeometry(QtCore.QRect(90, 350, 551, 131))
+        self.accounts_text_edit.setObjectName("textEdit")
+        self.force_input_accounts_radio_button = QtWidgets.QRadioButton(self.centralwidget)
+        self.force_input_accounts_radio_button.setGeometry(QtCore.QRect(90, 320, 261, 17))
+        self.force_input_accounts_radio_button.setChecked(True)
+        self.force_input_accounts_radio_button.setObjectName("force_input_accounts_radio_button")
+
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -110,13 +148,13 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "AlisToolGPM---0387517744---"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "AlisToolGPMMultipleTab ---0387517744---"))
         self.keyTMProxy.setToolTip(_translate("MainWindow", "Nhap key Tmproxy, ngan cach bang dau |"))
-        self.label.setText(_translate("MainWindow", "Key TMProxy"))
+        self.label.setText(_translate("MainWindow", "Key Proxy"))
         self.runButton.setText(_translate("MainWindow", "Run"))
         self.numberThreads.setInputMask(_translate("MainWindow", "9"))
         self.numberThreads.setText(_translate("MainWindow", "4"))
-        self.label_2.setText(_translate("MainWindow", "So luong"))
+        self.label_2.setText(_translate("MainWindow", "Số luồng"))
         self.stopButton.setText(_translate("MainWindow", "Stop"))
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "Stt"))
@@ -124,15 +162,22 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "Status"))
         item = self.tableWidget.horizontalHeaderItem(2)
         item.setText(_translate("MainWindow", "KEY_TMPROXY"))
-        self.url.setToolTip(_translate("MainWindow", "Nhập url trang cần vào"))
+        item = self.tableWidget.horizontalHeaderItem(3)
+        item.setText(_translate("MainWindow", "player_id"))
+        item = self.tableWidget.horizontalHeaderItem(4)
+        item.setText(_translate("MainWindow", "password"))
         self.label_5.setText(_translate("MainWindow", "URL"))
         self.apiGpmAddress.setText(_translate("MainWindow", "http://127.0.0.1:19995"))
-        self.label_3.setText(_translate("MainWindow", "Dia chi GPM (Bam Copy tren app)"))
-        self.url.setToolTip(_translate("MainWindow", "Nhap key"))
-        self.label_5.setText(_translate("MainWindow", "URL"))
+        self.label_3.setText(_translate("MainWindow", "Địa chỉ GPM(copy trên app)"))
         self.proxyBox.setTitle(_translate("MainWindow", "Loại Proxy"))
         self.tinsoftProxyButton.setText(_translate("MainWindow", "Tinsoft"))
         self.tmProxyButton.setText(_translate("MainWindow", "TmProxy"))
+        self.label_4.setText(_translate("MainWindow", "Mức độ phóng to"))
+        self.label_zoom.setText(_translate("MainWindow", "80"))
+        self.label_5.setText(_translate("MainWindow", "Danh sách accounts"))
+        self.accounts_text_edit.setPlaceholderText(
+            _translate("MainWindow", "Danh sách nick, mỗi nick 1 hàng, ngăn cách bằng dấu cách. Các nick sẽ vào các luồng tương ứng"))
+        self.force_input_accounts_radio_button.setText(_translate("MainWindow", "Bắt buộc nhập account?"))
 
     def runProgram(self):
         self.runButton.setText("Running...")
@@ -150,6 +195,7 @@ class Ui_MainWindow(object):
             self.runButton.setEnabled(True)
             self.stopButton.setEnabled(False)
             return
+
         self.main_program(list_key_proxy, int(self.numberThreads.text()))
 
     def stopProgram(self):
@@ -157,14 +203,21 @@ class Ui_MainWindow(object):
         self.runButton.setEnabled(True)
         self.stopButton.setEnabled(False)
 
+    def change_zoom_percent(self, value):
+        self.label_zoom.setText(str(value))
+
     def driver_gpm_login(self, key=None, **kwargs):
         thread_nth = kwargs.get("thread_nth")
         number_theads = kwargs.get('number_theads')
+        player_id = kwargs.get('player_id')
+        password = kwargs.get('password')
+        print(f"player_id = {player_id}, password = {password}")
+
         update_status(thread_nth, "Bắt đầu chạy")
         monitor = (get_monitors())[0]
         width = monitor.width
         height = monitor.height
-        print(width,height)
+        print(width, height)
         x_position = 0
         y_position = 0
         if kwargs.get('number_theads') == 2:
@@ -176,7 +229,7 @@ class Ui_MainWindow(object):
             x_position = (kwargs.get('thread_nth') % 2) * width
             if thread_nth > (number_theads - 1) // 2:
                 y_position = height
-            print(width,height,x_position,y_position)
+            print(width, height, x_position, y_position)
 
         elif number_theads > 4:
             height = int(height / 2)
@@ -221,21 +274,90 @@ class Ui_MainWindow(object):
                 options.debugger_address = seleniumRemoteDebugAddress
                 myService = service.Service(gpmDriverPath)
                 driver = UndetectChromeDriver(service=myService, options=options)
+
                 if driver:
                     update_status(thread_nth, 'Đã mở chrome')
-                driver.set_window_rect(x_position, y_position,width,height)
-                if self.url.toPlainText():
-                    driver.get(self.url.toPlainText())
+                driver.set_window_rect(x_position, y_position, width, height)
+                driver.set_page_load_timeout(30)
+                driver.implicitly_wait(25)
+
+                try:
+                    driver.get('https://www.ohvip9.com/index')
+                except TimeoutException:
+                    pass
+                driver.execute_script(f"document.body.style.zoom='{str(self.label_zoom.text())}%'")
+                time.sleep(3)
+                # try:
+                update_status(thread_nth, 'Đang đăng nhập')
+                def click_btn_login():
+                    # get_element_visibility_located(driver,"button.login_btn")
+                    driver.find_element(By.CSS_SELECTOR,"button.login_btn")
+                    driver.execute_script('document.querySelector("button.login_btn").click()')
+                    time.sleep(1)
+                click_btn_login()
+
+                if player_id and password:
+                    try:
+                        get_element_visibility_located(driver, "input.username_input").send_keys(player_id)
+                    except:
+                        click_btn_login()
+                        get_element_visibility_located(driver, "input.username_input").send_keys(player_id)
+                    time.sleep(1)
+                    get_element_visibility_located(driver, "input.password_input").send_keys(password)
+                    time.sleep(1)
+
+                    # get_element_visibility_located(driver,'button.submit_btn')
+                    driver.find_element(By.CSS_SELECTOR, "button.submit_btn")
+                    driver.execute_script('document.querySelector("button.submit_btn").click()')
+                    time.sleep(2)
+                    try:
+                        WebDriverWait(driver, 30).until(EC.text_to_be_present_in_element((By.CSS_SELECTOR, "span.menu-btn"), player_id.strip()))
+                        update_status(thread_nth, 'Đã login thành công')
+                    except:
+                        update_status(thread_nth, 'error_login fail')
                 else:
-                    driver.get("https://iphey.com/")
-                driver.execute_script(f"document.body.style.zoom='80%'")
-                update_status(thread_nth, 'done')
+                    update_status(thread_nth, 'done')
+                # except:
+                #     update_status(thread_nth, 'error_đăng nhập -> nick này đăng nhập tay đi')
                 # return (driver, createdProfileId, width, height)
 
     def main_program(self, key_tmproxy_list, number_theads=4):
         threads = []
+        # Get account from text edit which user type in
+        accounts = []
+        text_accounts_from_editor = self.accounts_text_edit.toPlainText()
+        print(text_accounts_from_editor)
+        lines = text_accounts_from_editor.split('\n')
+        for line in lines:
+            pair = line.split(' ')
+            if len(pair) == 2:
+                data_tuple = (pair[0], pair[1])
+                accounts.append(data_tuple)
+        print(f"accounts = {accounts}")
+        if self.force_input_accounts_radio_button.isChecked():
+            if len(accounts) < int(self.numberThreads.text()):
+                msg = QMessageBox()
+                msg.setWindowTitle("Error")
+                msg.setText("Số Account nhỏ hơn số luồng mong muốn. Mời nhập lại")
+                x = msg.exec_()
+                self.runButton.setText("Run")
+                self.runButton.setEnabled(True)
+                self.stopButton.setEnabled(False)
+                return
+
         for i in range(int(number_theads)):
-            threads += [threading.Thread(target=self.driver_gpm_login, args=(key_tmproxy_list[i],), kwargs={"number_theads": int(number_theads), "thread_nth": i})]
+            if i < len(accounts):
+                account = accounts[i]
+            else:
+                account = ('', '')
+            player_id = ''
+            password = ''
+            if account:
+                player_id = account[0].strip() or ''
+                password = account[1].strip() or ''
+            threads += [threading.Thread(target=self.driver_gpm_login, args=(key_tmproxy_list[i],),
+                                         kwargs={"number_theads": int(number_theads), "thread_nth": i, "player_id": player_id,
+                                                 "password": password})]
 
         for thread in threads:
             thread.start()
@@ -256,12 +378,23 @@ class Ui_MainWindow(object):
             app.processEvents()
             all_done = True
             for i in range(len(statuses)):
+                if i < len(accounts):
+                    account = accounts[i]
+                else:
+                    account = ('', '')
+                player_id = ''
+                password = ''
+                if account:
+                    player_id = account[0] or ''
+                    password = account[1] or ''
                 # print(statuses[row], "error" in str(statuses[row]))
-                if statuses[row] != 'done' and ("error" not in str(statuses[row])):
+                if statuses[row] != 'Đã login thành công' and statuses[row] != 'done' and  ("error" not in str(statuses[row])):
                     all_done = False
                 self.tableWidget.setItem(row, 0, QtWidgets.QTableWidgetItem(f'Luồng {i + 1}'))
                 self.tableWidget.setItem(row, 1, QtWidgets.QTableWidgetItem(statuses[row]))
                 self.tableWidget.setItem(row, 2, QtWidgets.QTableWidgetItem(key_tmproxy_list[row]))
+                self.tableWidget.setItem(row, 3, QtWidgets.QTableWidgetItem(player_id))
+                self.tableWidget.setItem(row, 4, QtWidgets.QTableWidgetItem(password))
                 row = row + 1
                 app.processEvents()
             if all_done:
@@ -276,9 +409,12 @@ class Ui_MainWindow(object):
 def setupUI_custom(ui_main: Ui_MainWindow):
     ui_main.tableWidget.setColumnWidth(1, 200)
     ui_main.tableWidget.setColumnWidth(2, 300)
+    ui_main.tableWidget.setColumnWidth(3, 100)
+    ui_main.tableWidget.setColumnWidth(4, 100)
     ui_main.stopButton.setEnabled(False)
     ui_main.runButton.clicked.connect(ui_main.runProgram)
     ui_main.stopButton.clicked.connect(ui_main.stopProgram)
+    ui_main.slider_zoom_percent.valueChanged.connect(ui_main.change_zoom_percent)
 
 
 if __name__ == "__main__":

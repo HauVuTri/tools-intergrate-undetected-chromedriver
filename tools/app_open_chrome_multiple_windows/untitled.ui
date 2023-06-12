@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>850</width>
-    <height>662</height>
+    <width>852</width>
+    <height>937</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,14 +33,14 @@
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>10</x>
       <y>20</y>
       <width>71</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>Key TMProxy</string>
+     <string>Key Proxy</string>
     </property>
    </widget>
    <widget class="QPushButton" name="runButton">
@@ -75,14 +75,14 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>10</x>
       <y>70</y>
       <width>71</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>So luong</string>
+     <string>Số luồng</string>
     </property>
    </widget>
    <widget class="QPushButton" name="stopButton">
@@ -101,11 +101,17 @@
    <widget class="QTableWidget" name="tableWidget">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>240</y>
-      <width>591</width>
+      <x>80</x>
+      <y>560</y>
+      <width>681</width>
       <height>291</height>
      </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>681</width>
+      <height>0</height>
+     </size>
     </property>
     <column>
      <property name="text">
@@ -147,38 +153,12 @@
      <string>Dia chi GPM (Bam Copy tren app)</string>
     </property>
    </widget>
-   <widget class="QTextEdit" name="url">
-    <property name="geometry">
-     <rect>
-      <x>100</x>
-      <y>180</y>
-      <width>591</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Nhap key Tmproxy</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>190</y>
-      <width>31</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>URL</string>
-    </property>
-   </widget>
    <widget class="QGroupBox" name="proxyBox">
     <property name="geometry">
      <rect>
       <x>470</x>
       <y>100</y>
-      <width>281</width>
+      <width>221</width>
       <height>61</height>
      </rect>
     </property>
@@ -214,6 +194,128 @@
       <string>TmProxy</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QSlider" name="slider_zoom_percent">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>240</y>
+      <width>511</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>50</number>
+    </property>
+    <property name="maximum">
+     <number>100</number>
+    </property>
+    <property name="sliderPosition">
+     <number>80</number>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>230</y>
+      <width>81</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Mức độ phóng to</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="scaledContents">
+     <bool>false</bool>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_zoom">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>240</y>
+      <width>121</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="minimumSize">
+     <size>
+      <width>0</width>
+      <height>0</height>
+     </size>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>18</pointsize>
+     </font>
+    </property>
+    <property name="lineWidth">
+     <number>1</number>
+    </property>
+    <property name="text">
+     <string>80</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>360</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Danh sách nick</string>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>350</y>
+      <width>551</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="placeholderText">
+     <string>Danh sách nick, mỗi nick 1 hàng, ngăn cách bằng dấu cách. Các nick sẽ vào các luồng tương ứng</string>
+    </property>
+   </widget>
+   <widget class="QRadioButton" name="force_input_accounts_radio_button">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>320</y>
+      <width>261</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Bắt buộc nhập account?</string>
+    </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
